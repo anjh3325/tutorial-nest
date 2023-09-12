@@ -17,9 +17,8 @@ model Board {
   status String
 
 }
-
 model User{
   id Int @default(autoincrement()) @id
-  username String
+  username String @unique
   password String
 }

@@ -44,7 +44,7 @@ export class BoardsService {
   }
 
   // 특정 게시글 삭제
-  async deleteBoardById(id: number) {
+  async deleteBoardById(id: number): Promise<void> {
     this.getBoardById(id);
 
     await this.prismaServie.board.delete({
