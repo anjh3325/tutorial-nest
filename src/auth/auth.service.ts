@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { AuthCredentialDTO } from './dto/auth-credential.dto';
-import { ConflictException } from '@nestjs/common/exceptions';
+import {
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common/exceptions';
 import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private prismaServie: PrismaService) {}
+  constructor(
+    private prismaServie: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   async signUp(authCredentialDTO: AuthCredentialDTO): Promise<void> {
     const salt = await bcrypt.genSalt();
@@ -18,7 +25,9 @@ export class AuthService {
       throw new ConflictException('Existing username');
     }
   }
-  async signIn(authCredentialDTO: AuthCredentialDTO): Promise<string> {
+  async signIn(
+    authCredentialDTO: AuthCredentialDTO,
+  ): Promise<{ accessToken: string }> {
     const user = await this.prismaServie.user.findUnique({
       where: { username: authCredentialDTO.username },
     });
@@ -27,9 +36,12 @@ export class AuthService {
       user &&
       (await bcrypt.compare(authCredentialDTO.password, user.password))
     ) {
-      return 'logIn success';
+      const payload = { username: user.username };
+      const accessToken = await this.jwtService.sign(payload);
+
+      return { accessToken };
     } else {
-      return 'logIn fail';
+      throw new UnauthorizedException('login failed');
     }
   }
 }
