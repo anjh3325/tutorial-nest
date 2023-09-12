@@ -6,6 +6,8 @@ import {
   Param,
   Patch,
   Post,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Board } from '@prisma/client';
 import { BoardsService } from './boards.service';
@@ -16,26 +18,27 @@ export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
   @Post()
+  @UsePipes(ValidationPipe)
   createBoard(@Body() data: CreateBoardDTO): Promise<Board> {
     return this.boardsService.createBoard(data);
   }
   @Get()
-  async getAllBoard(): Promise<Board[]> {
+  getAllBoard(): Promise<Board[]> {
     return this.boardsService.getAllBoard();
   }
   @Get('/:id')
-  async getBoardId(@Param('id') id: number): Promise<Board> {
+  getBoardId(@Param('id') id: number): Promise<Board> {
     return this.boardsService.getBoardById(id);
   }
   @Patch('/:id')
-  async updateBoardById(
+  updateBoardById(
     @Param('id') id: number,
     @Body() data: CreateBoardDTO,
   ): Promise<Board> {
     return this.boardsService.updateBoardById(id, data);
   }
   @Delete('/:id')
-  async deleteBoardById(@Param('id') id: number) {
+  deleteBoardById(@Param('id') id: number) {
     return this.boardsService.deleteBoardById(id);
   }
 }

@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BoardStatus } from './board-status.enum';
-import { v1 as uuid } from 'uuid';
-import { CreateBoardDTO } from './dto/create-board.dto';
 import { Board } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { CreateBoardDTO } from './dto/create-board.dto';
 
 @Injectable()
 export class BoardsService {
