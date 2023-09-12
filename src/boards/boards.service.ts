@@ -1,45 +1,56 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Board, BoardStatus } from './board.model';
+import { BoardStatus } from './board-status.enum';
 import { v1 as uuid } from 'uuid';
 import { CreateBoardDTO } from './dto/create-board.dto';
+import { Board } from '@prisma/client';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
+  constructor(private prismaServie: PrismaService) {}
 
-  getAllBoards(): Board[] {
-    return this.boards;
+  // 게시글 생성
+  async createBoard(createBoardDTO: CreateBoardDTO): Promise<Board> {
+    return await this.prismaServie.board.create({
+      data: createBoardDTO,
+    });
   }
-  createBoard(createBoardDTO: CreateBoardDTO) {
-    const { title, description } = createBoardDTO;
-    const board: Board = {
-      id: uuid(),
-      title,
-      description,
-      status: BoardStatus.PUBLIC,
-    };
 
-    this.boards.push(board);
-    return board;
+  // 전체 게시글 불러오기
+  async getAllBoard(): Promise<Board[]> {
+    return await this.prismaServie.board.findMany();
   }
-  getBoardById(id: string): Board {
-    const found = this.boards.find((board) => board.id === id);
+
+  // 특정 게시글 불러오기
+  async getBoardById(id: number): Promise<Board> {
+    const found = await this.prismaServie.board.findUnique({
+      where: { id: Number(id) },
+    });
     if (!found) {
-      throw new NotFoundException(`Can't find board with id ${id}`);
+      throw new NotFoundException(`Can't find Board with id ${id}`);
     }
-
     return found;
   }
-  deleteBoard(id: string): void {
-    const found = this.getBoardById(id);
-    if (!found) {
-      throw new NotFoundException(`Can't find board with id ${id}`);
-    }
-    this.boards = this.boards.filter((board) => board.id !== found.id);
+
+  // 특정 게시글 수정
+  async updateBoardById(
+    id: number,
+    createBoardDTO: CreateBoardDTO,
+  ): Promise<Board> {
+    this.getBoardById(id);
+
+    return await this.prismaServie.board.update({
+      where: { id: Number(id) },
+      data: createBoardDTO,
+    });
   }
-  updateBoardStatus(id: string, status: BoardStatus): Board {
-    const board = this.getBoardById(id);
-    board.status = status;
-    return board;
+
+  // 특정 게시글 삭제
+  async deleteBoardById(id: number) {
+    this.getBoardById(id);
+
+    await this.prismaServie.board.delete({
+      where: { id: Number(id) },
+    });
   }
 }

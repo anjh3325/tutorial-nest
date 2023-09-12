@@ -6,40 +6,36 @@ import {
   Param,
   Patch,
   Post,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
+import { Board } from '@prisma/client';
 import { BoardsService } from './boards.service';
-import { Board, BoardStatus } from './board.model';
 import { CreateBoardDTO } from './dto/create-board.dto';
-import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
 
 @Controller('boards')
 export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
-  @Get()
-  getAllBoard(): Board[] {
-    return this.boardsService.getAllBoards();
-  }
   @Post()
-  @UsePipes(ValidationPipe)
-  createBoard(@Body() createBoardDTO: CreateBoardDTO): Board {
-    return this.boardsService.createBoard(createBoardDTO);
+  createBoard(@Body() data: CreateBoardDTO): Promise<Board> {
+    return this.boardsService.createBoard(data);
+  }
+  @Get()
+  async getAllBoard(): Promise<Board[]> {
+    return this.boardsService.getAllBoard();
   }
   @Get('/:id')
-  getBoardById(@Param('id') id: string): Board {
+  async getBoardId(@Param('id') id: number): Promise<Board> {
     return this.boardsService.getBoardById(id);
   }
-  @Delete('/:id')
-  deleteBoard(@Param('id') id: string): void {
-    return this.boardsService.deleteBoard(id);
+  @Patch('/:id')
+  async updateBoardById(
+    @Param('id') id: number,
+    @Body() data: CreateBoardDTO,
+  ): Promise<Board> {
+    return this.boardsService.updateBoardById(id, data);
   }
-  @Patch('/:id/status')
-  updateBoardStatus(
-    @Param('id') id: string,
-    @Body('status', BoardStatusValidationPipe) status: BoardStatus,
-  ): Board {
-    return this.boardsService.updateBoardStatus(id, status);
+  @Delete('/:id')
+  async deleteBoardById(@Param('id') id: number) {
+    return this.boardsService.deleteBoardById(id);
   }
 }
