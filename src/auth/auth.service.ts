@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaServie: PrismaService,
+    private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
 
@@ -20,7 +20,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(authCredentialDTO.password, salt);
     authCredentialDTO.password = hashedPassword;
     try {
-      await this.prismaServie.user.create({ data: authCredentialDTO });
+      await this.prismaService.user.create({ data: authCredentialDTO });
     } catch (error) {
       throw new ConflictException('Existing username');
     }
@@ -28,7 +28,7 @@ export class AuthService {
   async signIn(
     authCredentialDTO: AuthCredentialDTO,
   ): Promise<{ accessToken: string }> {
-    const user = await this.prismaServie.user.findUnique({
+    const user = await this.prismaService.user.findUnique({
       where: { username: authCredentialDTO.username },
     });
 

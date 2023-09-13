@@ -12,8 +12,10 @@ import {
 import { Board } from '@prisma/client';
 import { BoardsService } from './boards.service';
 import { CreateBoardDTO } from './dto/create-board.dto';
-
+import { AuthGuard } from '@nestjs/passport';
+import { UseGuards } from '@nestjs/common/decorators';
 @Controller('boards')
+@UseGuards(AuthGuard())
 export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
